@@ -3,8 +3,39 @@ import uuid
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import MinLengthValidator
+from django.contrib.auth.models import BaseUserManager
 
-class User(AbstractBaseUser, PermissionsMixin):
+
+class EmployeeUserManager(BaseUserManager):
+    """Менеджер для подели пользователя кабинета"""
+
+    def create_user(self, email, name, password=None):
+        """Создание пользователя"""
+
+        if not email:
+            raise ValueError("Для пользователя обязательно указание электронной почты")
+        
+        email = self.normalize_email(email)
+        user = self.model(email=email, name=name)
+
+        user.set_password(password)
+        user.save(using=self._db)
+
+        return user
+
+    def create_superuser(self, email, name, password):
+        """Создание нового администратора"""
+
+        user = self.create_user(email, name, password)
+        user.is_superuser = True
+        user.is_staff = True
+        user.save(using=self._db)
+
+        return user
+
+
+
+class EmployeeUser(AbstractBaseUser, PermissionsMixin):
     """Модель пользователя кабинета"""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="Уникальный идентификатор")
@@ -17,7 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True, verbose_name="Активный")
     is_staff = models.BooleanField(default=False, verbose_name="Администратор")
 
-    #objects = UserManager()
+    objects = EmployeeUserManager()
 
     USERNAME_FIELD = "email" # авторизация по почте
     REQUIRED_FIELDS = ["firstname", "lastname", ]
