@@ -9,24 +9,24 @@ from django.contrib.auth.models import BaseUserManager
 class EmployeeUserManager(BaseUserManager):
     """Менеджер для подели пользователя кабинета"""
 
-    def create_user(self, email, name, password=None):
+    def create_user(self, email, lastname, firstname, password=None):
         """Создание пользователя"""
 
         if not email:
             raise ValueError("Для пользователя обязательно указание электронной почты")
         
         email = self.normalize_email(email)
-        user = self.model(email=email, name=name)
+        user = self.model(email=email, lastname=lastname, firstname=firstname)
 
         user.set_password(password)
         user.save(using=self._db)
 
         return user
 
-    def create_superuser(self, email, name, password):
+    def create_superuser(self, email, lastname, firstname, password):
         """Создание нового администратора"""
 
-        user = self.create_user(email, name, password)
+        user = self.create_user(email, lastname, firstname, password)
         user.is_superuser = True
         user.is_staff = True
         user.save(using=self._db)
@@ -58,8 +58,3 @@ class EmployeeUser(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return self.email
-    
-
-
-
-
